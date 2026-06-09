@@ -35,6 +35,9 @@ example (A B C D : Prop) (h : ∃ n : ℕ, A ∧ (∃ m : ℕ, B ∧ C) ∧ D) :
     hC : C
   -/
   and_intros
+  /-
+    D ∧ C ∧ B ∧ A is broken into four subgoals.
+  -/
   · exact hD
   · exact hC
   · exact hB
