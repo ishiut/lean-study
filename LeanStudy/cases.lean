@@ -24,7 +24,7 @@ example (A B C D : Prop) (h : ∃ n : ℕ, A ∧ (∃ m : ℕ, B ∧ C) ∧ D) :
 
 example (A B C D : Prop) (h : ∃ n : ℕ, A ∧ (∃ m : ℕ, B ∧ C) ∧ D) :
     D ∧ C ∧ B ∧ A := by
-  rcases h with ⟨n, hA, ⟨⟨m, hB, hC⟩, hD⟩⟩
+  rcases h with ⟨n, hA, ⟨m, hB, hC⟩, hD⟩
   /-
     The hypotheses appear.
     n : ℕ
@@ -38,6 +38,15 @@ example (A B C D : Prop) (h : ∃ n : ℕ, A ∧ (∃ m : ℕ, B ∧ C) ∧ D) :
   /-
     D ∧ C ∧ B ∧ A is broken into four subgoals.
   -/
+  · exact hD
+  · exact hC
+  · exact hB
+  · exact hA
+
+example (A B C D : Prop) (h : ∃ n : ℕ, A ∧ (∃ m : ℕ, B ∧ C) ∧ D) :
+    D ∧ C ∧ B ∧ A := by
+  obtain ⟨n, hA, ⟨m, hB, hC⟩, hD⟩ := h
+  and_intros
   · exact hD
   · exact hC
   · exact hB
