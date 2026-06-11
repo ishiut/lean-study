@@ -51,3 +51,16 @@ example (A B C D : Prop) (h : ∃ n : ℕ, A ∧ (∃ m : ℕ, B ∧ C) ∧ D) :
   · exact hC
   · exact hB
   · exact hA
+
+example (A B C : Prop) (h : A ∨ (B ∧ C)) : (A ∨ B) ∧ (A ∨ C) := by
+  obtain hA | ⟨hB, hC⟩ := h
+  · constructor
+    · left
+      exact hA
+    · left
+      exact hA
+  · constructor
+    · right
+      exact hB
+    · right
+      exact hC
