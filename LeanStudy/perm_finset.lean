@@ -116,7 +116,6 @@ theorem allListsOfLength_card (s : Finset ℕ) (k : ℕ) :
     have h_disj2 : (allListsOfLength s k : Set (List ℕ)).PairwiseDisjoint
         (fun (t : List ℕ) ↦ Finset.image (fun a ↦ a :: t) s) := by
       intro t1 ht1 t2 ht2 ht
-      
       simp only [SetLike.mem_coe] at ht1
       simp only [SetLike.mem_coe] at ht2
       unfold Function.onFun
