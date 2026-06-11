@@ -178,3 +178,16 @@ theorem powerset_card_sub (n : ℕ) (s : Finset ℕ) (h : s.card = n) :
 theorem powerset_card (s : Finset ℕ) : s.powerset.card = 2 ^ (s.card) := by
   apply powerset_card_sub
   rfl
+
+-- The following definitions are the same.
+-- def combination (s : Finset ℕ) (k : ℕ) : Finset (Finset ℕ) :=
+--   s.powerset.filter (fun t ↦ t.card = k)
+
+def combination (s : Finset ℕ) (k : ℕ) : Finset (Finset ℕ) :=
+  {t ∈ s.powerset | t.card = k}
+
+#eval combination {0, 1, 2, 3} 2
+
+lemma combination_rec (s : Finset ℕ) (k : ℕ) (a : ℕ) (ha : a ∈ s):
+    combination s (k + 1) = combination (s.erase a) (k + 1) ∪
+    Finset.image (fun t ↦ t ∪ {a}) (combination (s.erase a) k) := by
