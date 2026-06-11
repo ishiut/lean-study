@@ -288,7 +288,7 @@ lemma permutation_rec (s : Finset ℕ) (k : ℕ) :
     constructor
     case mp =>
       intro h
-      simp
+      simp only [Finset.mem_biUnion, Finset.mem_image]
       apply (permutation_int s (k + 1 ) l).mp at h
       cases l
       case nil =>
