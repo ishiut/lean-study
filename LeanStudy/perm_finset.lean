@@ -100,7 +100,7 @@ theorem allListsOfLength_card (s : Finset ℕ) (k : ℕ) :
           := by apply (Finset.sum_const_nat h1_0).symm
     have h_disj : ∀ t1 t2 : List ℕ, t1 ≠ t2 → Disjoint
         (Finset.image (fun a ↦ a :: t1) s) (Finset.image (fun a ↦ a :: t2) s) := by
-      simp only [ne_eq]
+      -- simp only [ne_eq]
       intro t1 t2 ht
       rw [Finset.disjoint_iff_ne]
       intro l1 hl1 l2 hl2
