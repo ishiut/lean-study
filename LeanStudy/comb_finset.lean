@@ -188,6 +188,86 @@ def combination (s : Finset ℕ) (k : ℕ) : Finset (Finset ℕ) :=
 
 #eval combination {0, 1, 2, 3} 2
 
-lemma combination_rec (s : Finset ℕ) (k : ℕ) (a : ℕ) (ha : a ∈ s):
+example (s : Finset ℕ) (a : ℕ) (h : a ∉ s) : (insert a s).card = s.card + 1
+    := by
+  exact Finset.card_insert_of_notMem h
+
+lemma combination_rec (s : Finset ℕ) (k : ℕ) (a : ℕ) (ha : a ∈ s) :
     combination s (k + 1) = combination (s.erase a) (k + 1) ∪
     Finset.image (fun t ↦ t ∪ {a}) (combination (s.erase a) k) := by
+  apply Finset.ext
+  intro t
+  constructor
+  case h.mp =>
+    intro ht
+    simp only [Finset.union_singleton, Finset.mem_union, Finset.mem_image]
+    unfold combination
+    simp only [Finset.mem_filter, Finset.mem_powerset]
+    unfold combination at ht
+    simp only [Finset.mem_filter, Finset.mem_powerset] at ht
+    by_cases hat : a ∈ t
+    case pos =>
+      right
+      use t.erase a
+      and_intros
+      · intro b hb
+        simp only [Finset.mem_erase, ne_eq] at hb
+        simp only [Finset.mem_erase, ne_eq]
+        constructor
+        · exact hb.left
+        · apply ht.left hb.right
+      · calc
+          (t.erase a).card = t.card - 1 := by exact Finset.card_erase_of_mem hat
+          _ = k + 1 -1 := by rw [ht.right]
+          _ = k := by omega
+      · exact Finset.insert_erase hat
+    case neg =>
+      left
+      constructor
+      · intro b hb
+        simp only [Finset.mem_erase, ne_eq]
+        constructor
+        · by_contra
+          rw [this] at hb
+          contradiction
+        · apply ht.left hb
+      · exact ht.right
+  case h.mpr =>
+    intro ht
+    simp only [Finset.union_singleton, Finset.mem_union, Finset.mem_image] at ht
+    obtain ht_l | ht_r := ht
+    case inl =>
+      unfold combination at ht_l
+      simp only [Finset.mem_filter, Finset.mem_powerset] at ht_l
+      unfold combination
+      simp only [Finset.mem_filter, Finset.mem_powerset]
+      constructor
+      · intro b hb
+        apply ht_l.left at hb
+        exact Finset.mem_of_mem_erase hb
+      · exact ht_l.right
+    case inr =>
+      obtain ⟨as, has⟩ := ht_r
+      unfold combination at has
+      simp only [Finset.mem_filter, Finset.mem_powerset] at has
+      unfold combination
+      simp only [Finset.mem_filter, Finset.mem_powerset]
+      constructor
+      case left =>
+        intro b hb
+        rw [← has.right] at hb
+        simp only [Finset.mem_insert] at hb
+        obtain hb_l | hb_r := hb
+        case inl =>
+          rw [hb_l]
+          exact ha
+        case inr =>
+          apply has.left.left at hb_r
+          exact Finset.mem_of_mem_erase hb_r
+      case right =>
+        rw [← has.right]
+        rw [← has.left.right]
+        apply Finset.card_insert_of_notMem
+        by_contra
+        apply has.left.left at this
+        simp only [Finset.mem_erase, ne_eq, not_true_eq_false, false_and] at this
