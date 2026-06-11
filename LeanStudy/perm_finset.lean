@@ -10,7 +10,7 @@ def allListsOfLength (s : Finset ℕ) (k : ℕ) : Finset (List ℕ) :=
       Finset.biUnion (allListsOfLength s k)
         (fun t ↦ Finset.image (fun a ↦ a :: t) s)
 
-theorem allListsOfLength_ext (s : Finset ℕ) (k : ℕ) (l : List ℕ) :
+theorem allListsOfLength_int (s : Finset ℕ) (k : ℕ) (l : List ℕ) :
     l ∈ allListsOfLength s k ↔ l.length = k ∧ ∀ a ∈ l, a ∈ s := by
   revert l
   induction k
@@ -133,7 +133,7 @@ theorem allListsOfLength_card (s : Finset ℕ) (k : ℕ) :
 def permutation (s : Finset ℕ) (k : ℕ) : Finset (List ℕ) :=
   (allListsOfLength s k).filter (fun l ↦ l.Nodup)
 
-theorem permutation_ext (s : Finset ℕ) (k : ℕ) (l : List ℕ) :
+theorem permutation_int (s : Finset ℕ) (k : ℕ) (l : List ℕ) :
     l ∈ permutation s k ↔ l.length = k ∧ (∀ a ∈ l, a ∈ s) ∧ l.Nodup := by
   constructor
   case mp =>
@@ -142,13 +142,13 @@ theorem permutation_ext (s : Finset ℕ) (k : ℕ) (l : List ℕ) :
     case left =>
       unfold permutation at hl
       simp only [Finset.mem_filter] at hl
-      apply ((allListsOfLength_ext s k l).mp hl.left).left
+      apply ((allListsOfLength_int s k l).mp hl.left).left
     case right =>
       unfold permutation at hl
       simp only [Finset.mem_filter] at hl
       constructor
       case left =>
-        apply ((allListsOfLength_ext s k l).mp hl.left).right
+        apply ((allListsOfLength_int s k l).mp hl.left).right
       case right =>
         exact hl.right
   case mpr =>
@@ -157,7 +157,7 @@ theorem permutation_ext (s : Finset ℕ) (k : ℕ) (l : List ℕ) :
     simp only [Finset.mem_filter]
     constructor
     case left =>
-      apply (allListsOfLength_ext s k l).mpr
+      apply (allListsOfLength_int s k l).mpr
       constructor
       case left => exact h.left
       case right => exact h.right.left
@@ -190,11 +190,11 @@ lemma permutation_rec_sub (s : Finset ℕ) (k : ℕ) (a : ℕ) (h : a ∈ s) :
     simp only [Finset.mem_image, Finset.mem_filter] at hl
     obtain ⟨l1, hl1⟩ := hl
     have hl1_length : l1.length = k + 1 := by
-      apply ((permutation_ext s (k + 1) l1).mp hl1.left.left).left
+      apply ((permutation_int s (k + 1) l1).mp hl1.left.left).left
     cases l1
     case nil => contradiction
     case cons b bs =>
-      apply (permutation_ext (s.erase a) k l).mpr
+      apply (permutation_int (s.erase a) k l).mpr
       simp only [List.length_cons, Nat.add_right_cancel_iff] at hl1_length
       unfold head' tail' at hl1
       simp only at hl1
@@ -207,10 +207,10 @@ lemma permutation_rec_sub (s : Finset ℕ) (k : ℕ) (a : ℕ) (h : a ∈ s) :
           intro c hc
           rw [hl1.right] at hl1
           have h2 : ∀ d ∈ b :: l, d ∈ s := by
-            apply ((permutation_ext s (k + 1) (b :: l)).mp hl1.left.left).right.left
+            apply ((permutation_int s (k + 1) (b :: l)).mp hl1.left.left).right.left
           simp only [Finset.mem_erase, ne_eq]
           have h3 : (b :: l).Nodup := by
-            apply ((permutation_ext s (k + 1) (b :: l)).mp hl1.left.left).right.right
+            apply ((permutation_int s (k + 1) (b :: l)).mp hl1.left.left).right.right
           rw [hl1.left.right] at h3
           simp only [List.nodup_cons] at h3
           constructor
@@ -224,7 +224,7 @@ lemma permutation_rec_sub (s : Finset ℕ) (k : ℕ) (a : ℕ) (h : a ∈ s) :
           exact hc
         case right =>
           have h4 : (b :: bs).Nodup := by
-            apply ((permutation_ext s (k + 1) (b :: bs)).mp hl1.left.left).right.right
+            apply ((permutation_int s (k + 1) (b :: bs)).mp hl1.left.left).right.right
           rw [hl1.right] at h4
           simp only [List.nodup_cons] at h4
           exact h4.right
@@ -233,13 +233,13 @@ lemma permutation_rec_sub (s : Finset ℕ) (k : ℕ) (a : ℕ) (h : a ∈ s) :
     unfold filter_and_omit_by_head
     simp only [Finset.mem_image, Finset.mem_filter]
     have h1 : l.length = k ∧ (∀ b ∈ l, b ∈ (s.erase a)) ∧ l.Nodup := by
-      apply (permutation_ext (s.erase a) k l).mp hl
+      apply (permutation_int (s.erase a) k l).mp hl
     use (a :: l)
     constructor
     case left =>
       constructor
       case left =>
-        apply (permutation_ext s (k + 1) (a :: l)).mpr
+        apply (permutation_int s (k + 1) (a :: l)).mpr
         constructor
         case left =>
           simp only [List.length_cons, Nat.add_right_cancel_iff]
@@ -289,7 +289,7 @@ lemma permutation_rec (s : Finset ℕ) (k : ℕ) :
     case mp =>
       intro h
       simp
-      apply (permutation_ext s (k + 1 ) l).mp at h
+      apply (permutation_int s (k + 1 ) l).mp at h
       cases l
       case nil =>
         unfold List.length at h
@@ -305,7 +305,7 @@ lemma permutation_rec (s : Finset ℕ) (k : ℕ) :
           use bs
           constructor
           case h.left =>
-            apply (permutation_ext (s.erase b) k bs).mpr
+            apply (permutation_int (s.erase b) k bs).mpr
             and_intros
             case refine_1 =>
               exact h.left
@@ -326,8 +326,8 @@ lemma permutation_rec (s : Finset ℕ) (k : ℕ) :
       intro h
       simp only [Finset.mem_biUnion, Finset.mem_image] at h
       obtain ⟨a, ha, ⟨as, ⟨has1, has2⟩⟩⟩ := h
-      apply (permutation_ext s (k + 1) l).mpr
-      apply (permutation_ext (s.erase a) k as).mp at has1
+      apply (permutation_int s (k + 1) l).mpr
+      apply (permutation_int (s.erase a) k as).mp at has1
       obtain ⟨has1_length, has1_sub, has1_nodup⟩ := has1
       rw [← has2]
       simp only [List.length_cons, Nat.add_right_cancel_iff, List.mem_cons, forall_eq_or_imp,
