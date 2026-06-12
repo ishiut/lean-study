@@ -178,6 +178,8 @@ def filter_and_omit_by_head (ss : Finset (List ℕ)) (a : ℕ) :=
 
 #eval filter_and_omit_by_head {[0, 1, 2], [0, 2, 1], [1, 2, 3], [0, 3, 1]} 0
 
+
+
 lemma permutation_rec_sub (s : Finset ℕ) (k : ℕ) (a : ℕ) (h : a ∈ s) :
     filter_and_omit_by_head (permutation s (k + 1)) a = permutation (s.erase a) k
     := by
