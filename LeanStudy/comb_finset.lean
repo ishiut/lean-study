@@ -412,3 +412,20 @@ lemma combination_card (n : ℕ) (k : ℕ) (hk : k ≤ n) (s : Finset ℕ)
         have h1 : k = n := by omega
         rw [h1]
         unfold combination
+        simp only [Nat.choose_self]
+        have h1 : {t ∈ s.powerset | t.card = n + 1} = {s} := by
+          apply Finset.ext_iff.mpr
+          intro t
+          simp only [Finset.mem_filter, Finset.mem_powerset, Finset.mem_singleton]
+          constructor
+          case mp =>
+            intro ht
+            symm
+            -- It is notable that there is a theorem for this.
+            apply (Finset.eq_iff_card_ge_of_superset ht.left).mp
+            rw [hs, ht.right]
+          case mpr =>
+            intro hts
+            rw [hts]
+            simp only [subset_refl, true_and, hs]
+        simp only [h1, Finset.card_singleton]
