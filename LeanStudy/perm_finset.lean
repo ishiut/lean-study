@@ -176,9 +176,13 @@ def tail' (l : List ℕ) :=
 def filter_and_omit_by_head (ss : Finset (List ℕ)) (a : ℕ) :=
   (ss.filter (fun l ↦ (head' l) = a)).image (fun l ↦ tail' l)
 
+variable (ss : Finset (List ℕ)) (h_nonempty : ∀ x ∈ ss, x ≠ []) (target : ℕ)
+
 #eval filter_and_omit_by_head {[0, 1, 2], [0, 2, 1], [1, 2, 3], [0, 3, 1]} 0
 
 #check Finset.attach
+
+variable (ss : Finset (List ℕ)) (h_nonempty : ∀ x ∈ ss, x ≠ []) (target : ℕ)
 
 lemma permutation_rec_sub (s : Finset ℕ) (k : ℕ) (a : ℕ) (h : a ∈ s) :
     filter_and_omit_by_head (permutation s (k + 1)) a = permutation (s.erase a) k
