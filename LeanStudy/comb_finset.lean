@@ -271,3 +271,144 @@ lemma combination_rec (s : Finset ℕ) (k : ℕ) (a : ℕ) (ha : a ∈ s) :
         by_contra
         apply has.left.left at this
         simp only [Finset.mem_erase, ne_eq, not_true_eq_false, false_and] at this
+
+lemma combination_k_eq_zero (s : Finset ℕ) : combination s 0 = {∅} := by
+  unfold combination
+  simp only [Finset.card_eq_zero]
+  rw [Finset.ext_iff]
+  simp only [Finset.mem_filter, Finset.mem_powerset, Finset.mem_singleton, and_iff_right_iff_imp,
+    forall_eq, Finset.empty_subset]
+
+lemma combination_k_eq_zero_card (s : Finset ℕ) : (combination s 0).card = 1
+    := by
+  rw [combination_k_eq_zero]
+  simp only [Finset.card_singleton]
+
+example (s : Finset ℕ) (k : ℕ) (h : s.card = k + 1) : s.Nonempty := by
+  apply Finset.card_ne_zero.mp
+  omega
+
+example (n k : ℕ) (h : k ≤ n) : Nat.choose (n + 1) (k + 1)
+    = Nat.choose n (k + 1) + Nat.choose n k := by
+  rw [Nat.choose_succ_left]
+  · simp only [add_tsub_cancel_right]
+    omega
+  · omega
+
+lemma combination_card (n : ℕ) (k : ℕ) (hk : k ≤ n) (s : Finset ℕ)
+    (hs : s.card = n) : (combination s k).card = Nat.choose n k := by
+  revert s k
+  induction n
+  case zero =>
+    intro k hk s hs
+    have hk_zero : k = 0 := by omega
+    rw [hk_zero]
+    simp [combination_k_eq_zero_card]
+  case succ n ih =>
+    intro k hk s hs
+    cases k
+    case zero =>
+      simp [combination_k_eq_zero_card]
+    case succ k =>
+      by_cases h_k_succ_leq_n : k + 1 ≤ n
+      case pos =>
+        have h_nonempty : s.Nonempty := by
+          apply Finset.card_ne_zero.mp (by omega)
+        obtain ⟨a, ha⟩ := h_nonempty
+        rw [combination_rec s k a]
+        · have h1 : (combination (s.erase a) (k + 1)) ∩
+              (Finset.image (fun t ↦ t ∪ {a}) (combination (s.erase a) k)) = ∅ := by
+            apply Finset.ext_iff.mpr
+            intro b
+            constructor
+            case mp =>
+              intro hb
+              simp only [Finset.union_singleton, Finset.mem_inter, Finset.mem_image] at hb
+              obtain ⟨hb_l, ⟨as, has⟩⟩ := hb
+              have h1 : a ∈ b := by
+                rw [← has.right]
+                simp only [Finset.mem_insert, true_or]
+              unfold combination at hb_l
+              simp only [Finset.mem_filter, Finset.mem_powerset] at hb_l
+              apply hb_l.left at h1
+              simp only [Finset.mem_erase, ne_eq, not_true_eq_false, false_and] at h1
+            case mpr =>
+              simp only [Finset.notMem_empty, Finset.union_singleton, Finset.mem_inter,
+                Finset.mem_image, IsEmpty.forall_iff]
+          have h2 : (combination (s.erase a) (k + 1)).card = Nat.choose n (k + 1)
+              := by
+            apply ih (k + 1)
+            case hk => exact h_k_succ_leq_n
+            case hs =>
+              calc
+                _ = s.card - 1 := by apply Finset.card_erase_of_mem ha
+                _ = n + 1 - 1 := by rw [hs]
+                _ = n := by omega
+          have h3 : (Finset.image (fun t ↦ t ∪ {a}) (combination (s.erase a) k)).card
+              = (combination (s.erase a) k).card := by
+            apply Finset.card_image_iff.mpr
+            intro t1 ht1 t2 ht2 h
+            unfold combination at ht1
+            simp only [Finset.coe_filter, Finset.mem_powerset, Set.mem_setOf_eq] at ht1
+            unfold combination at ht2
+            simp only [Finset.coe_filter, Finset.mem_powerset, Set.mem_setOf_eq] at ht2
+            simp only [Finset.union_singleton] at h
+            apply Finset.ext_iff.mpr
+            intro b
+            constructor
+            case mp =>
+              intro hb
+              have h3 : b ≠ a := by
+                apply ht1.left at hb
+                simp only [Finset.mem_erase, ne_eq] at hb
+                exact hb.left
+              have h4 : b ∈ insert a t1 := by
+                simp only [Finset.mem_insert]
+                right
+                exact hb
+              rw [h] at h4
+              simp only [Finset.mem_insert] at h4
+              obtain h4l | h4r := h4
+              case inl => contradiction
+              case inr => exact h4r
+            case mpr =>
+              intro hb
+              have h3 : b ≠ a := by
+                apply ht2.left at hb
+                simp only [Finset.mem_erase, ne_eq] at hb
+                exact hb.left
+              have h4 : b ∈ insert a t2 := by
+                simp only [Finset.mem_insert]
+                right
+                exact hb
+              rw [← h] at h4
+              simp only [Finset.mem_insert] at h4
+              obtain h4l | h4r := h4
+              case inl => contradiction
+              case inr => exact h4r
+          have h4 : (Finset.image (fun t ↦ t ∪ {a}) (combination (s.erase a) k)).card
+              = Nat.choose n k := by
+            rw [h3]
+            apply ih
+            · omega
+            · calc
+                _ = s.card - 1 := by rw [Finset.card_erase_of_mem ha]
+                _ = n + 1 - 1 := by rw [hs]
+                _ = n := by omega
+          have h5 : Nat.choose n (k + 1) + Nat.choose n k =
+              Nat.choose n k + Nat.choose n (k + 1) := by omega
+          have h6 : Nat.choose n k + Nat.choose n (k + 1) =
+              Nat.choose (n + 1) (k + 1) := by
+            exact Eq.symm (Nat.choose_succ_succ' n k)
+          rw [Finset.card_union]
+          rw [h1]
+          rw [h2]
+          rw [h4]
+          rw [h5]
+          rw [h6]
+          simp only [Finset.card_empty, tsub_zero]
+        · exact ha
+      case neg =>
+        have h1 : k = n := by omega
+        rw [h1]
+        unfold combination
