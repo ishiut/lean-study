@@ -15,3 +15,8 @@ variable {α : Type*} (a : α) (s t : Finset α)
 #check s ∩ t
 
 end
+
+variable {α : Type*} (a : α) (s t : Set α)
+
+#check a ∈ s
+#check s ∩ t
