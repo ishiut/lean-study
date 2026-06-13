@@ -411,5 +411,3 @@ theorem permutation_card (s : Finset ℕ) (k : ℕ) :
       simp only [ne_eq, List.cons.injEq, not_and]
       intro hab
       contradiction
-
-#print axioms permutation_card
