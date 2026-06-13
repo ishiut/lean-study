@@ -6,6 +6,12 @@ theorem double_negation (P : Prop) (h : ¬¬P) : P := by
 
 #print axioms double_negation
 
+theorem safe_one (P : Prop) (h : P) : ¬¬P := by
+  intro h1
+  contradiction
+
+#print axioms safe_one
+
 open Classical in
 noncomputable section
 -- variable {α : Type*} [DecidableEq α] (a : α) (s t : Finset α)
