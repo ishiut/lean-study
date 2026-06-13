@@ -6,7 +6,7 @@ theorem double_negation (P : Prop) (h : ¬¬P) : P := by
 
 #print axioms double_negation
 
-open Classical
+open Classical in
 noncomputable section
 -- variable {α : Type*} [DecidableEq α] (a : α) (s t : Finset α)
 variable {α : Type*} (a : α) (s t : Finset α)
