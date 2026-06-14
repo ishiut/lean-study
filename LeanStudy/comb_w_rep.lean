@@ -89,11 +89,31 @@ def listAddToHead (l : List ℕ) (m : ℕ) : List ℕ :=
 lemma comb_w_rep_int (n k : ℕ) (l : List ℕ) : l ∈ comb_w_rep n k ↔
     l.length = n ∧ l.sum = k := by
   constructor
-  · intro hl
+  case mp =>
+    intro hl
     unfold comb_w_rep at hl
     simp only [Finset.mem_filter] at hl
-    apply
-
+    obtain ⟨hl1, hl2⟩ := hl
+    apply (allListsOfLength_int (Finset.range (k + 1)) n l).mp at hl1
+    exact ⟨hl1.left, hl2⟩
+  case mpr =>
+    intro h
+    obtain ⟨h_length, h_sum⟩ := h
+    unfold comb_w_rep
+    simp only [Finset.mem_filter]
+    constructor
+    case left =>
+      apply (allListsOfLength_int (Finset.range (k + 1)) n l).mpr
+      constructor
+      case left => exact h_length
+      case right =>
+        intro a ha
+        simp only [Finset.mem_range, Order.lt_add_one_iff]
+        have h1 : a ≤ l.sum := by
+          exact List.le_sum_of_mem ha
+        rw [h_sum] at h1
+        exact h1
+    case right => exact h_sum
 
 lemma comb_w_rep_rec_sub1 (n k : ℕ) : comb_w_rep n (k + 1) =
   (comb_w_rep n k).image (List.modifyHead (· + 1)) ∪
