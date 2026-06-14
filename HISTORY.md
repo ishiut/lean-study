@@ -3,7 +3,7 @@
 ## 2026-06-14
 
 ### Added
-- 
+- The proof of comb_w_rep_int was completed. 
 
 ## 2026-06-13
 
