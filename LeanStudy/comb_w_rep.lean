@@ -115,7 +115,7 @@ lemma comb_w_rep_int (n k : ℕ) (l : List ℕ) : l ∈ comb_w_rep n k ↔
         exact h1
     case right => exact h_sum
 
-lemma comb_w_rep_rec_sub1 (n k : ℕ) : comb_w_rep (n + 1) (k + 1) =
+lemma comb_w_rep_rec (n k : ℕ) : comb_w_rep (n + 1) (k + 1) =
     (comb_w_rep (n + 1) k).image (List.modifyHead (· + 1)) ∪
     (comb_w_rep n (k + 1)).image (List.cons 0) := by
   apply Finset.ext_iff.mpr
@@ -132,7 +132,7 @@ lemma comb_w_rep_rec_sub1 (n k : ℕ) : comb_w_rep (n + 1) (k + 1) =
     case nil =>
       simp only [List.sum_nil, reduceCtorEq] at hl_sum
     case cons a as =>
-      simp
+      simp only [Finset.mem_union, Finset.mem_image, List.cons.injEq, exists_eq_right_right]
       simp only [List.sum_cons] at hl_sum
       simp only [List.length_cons, Nat.add_right_cancel_iff] at hl_length
       by_cases ha_zero : a = 0
@@ -151,10 +151,24 @@ lemma comb_w_rep_rec_sub1 (n k : ℕ) : comb_w_rep (n + 1) (k + 1) =
               intro b hb
               apply hl_range
               right; exact hb
-          case right =>
-            omega
-        case h.right =>
-          omega
+          case right => omega
+        case h.right => omega
+      case neg =>
+        left
+        cases a
+        case h.zero => contradiction
+        case h.succ ap =>
+          use ap :: as
+          constructor
+          case h.left =>
+            rw [comb_w_rep_int]
+            simp only [List.length_cons, Nat.add_right_cancel_iff, List.sum_cons]
+            constructor
+            case left => exact hl_length
+            case right => omega
+          case h.right =>
+            unfold List.modifyHead
+            simp only
   case mpr =>
     intro hl
     simp only [Finset.mem_union, Finset.mem_image] at hl
@@ -170,13 +184,18 @@ lemma comb_w_rep_rec_sub1 (n k : ℕ) : comb_w_rep (n + 1) (k + 1) =
         subst hl1_r
         simp_all only [List.length_modifyHead]
       case right =>
-        have h1 : (List.modifyHead (fun x => x + 1) l1).sum = k + 1 := by
-          cases l1
-          case nil =>
-            contradiction
-          case cons a as =>
-            unfold List.modifyHead
-            simp only [List.sum_cons]
-            simp only [List.sum_cons] at hl1_sum
-            omega
-            omega
+        cases l1
+        case nil =>
+          contradiction
+        case cons a as =>
+          unfold List.modifyHead
+          simp only [List.sum_cons]
+          simp only [List.sum_cons] at hl1_sum
+          omega
+    case inr hl_a_zero =>
+      obtain ⟨as, ⟨has_l, has_r⟩⟩ := hl_a_zero
+      rw [comb_w_rep_int] at has_l
+      obtain ⟨has_length, has_sum⟩ := has_l
+      rw [← has_r]
+      simp only [List.length_cons, Nat.add_right_cancel_iff, List.sum_cons, zero_add]
+      exact ⟨has_length, has_sum⟩
