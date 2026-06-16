@@ -288,7 +288,7 @@ example (s : Finset ℕ) (k : ℕ) (h : s.card = k + 1) : s.Nonempty := by
   apply Finset.card_ne_zero.mp
   omega
 
-example (n k : ℕ) (h : k ≤ n) : Nat.choose (n + 1) (k + 1)
+example (n k : ℕ) : Nat.choose (n + 1) (k + 1)
     = Nat.choose n (k + 1) + Nat.choose n k := by
   rw [Nat.choose_succ_left]
   · simp only [add_tsub_cancel_right]
