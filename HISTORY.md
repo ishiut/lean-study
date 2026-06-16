@@ -1,5 +1,8 @@
 # History
 
+## 2026-06-15
+- The proof of comb_w_rep_rec was completed
+
 ## 2026-06-14
 
 ### Added
