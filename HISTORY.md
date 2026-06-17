@@ -1,5 +1,9 @@
 # History
 
+## 2026-06-16
+- The proof of listN_sum_zero_all_zero was completed. 
+- The statement of comb_w_rep_count was written. 
+
 ## 2026-06-15
 - The proof of comb_w_rep_rec was completed
 
