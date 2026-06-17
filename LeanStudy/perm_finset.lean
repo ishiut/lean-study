@@ -133,6 +133,10 @@ theorem allListsOfLength_card (s : Finset ℕ) (k : ℕ) :
 def permutation (s : Finset ℕ) (k : ℕ) : Finset (List ℕ) :=
   (allListsOfLength s k).filter (fun l ↦ l.Nodup)
 
+-- This returns an error.
+-- def permutation' (α : Type) (sl : Finset (List α)) (k : ℕ) : Finset (List α) :=
+--   sl.filter (fun l ↦ l.Nodup)
+
 theorem permutation_int (s : Finset ℕ) (k : ℕ) (l : List ℕ) :
     l ∈ permutation s k ↔ l.length = k ∧ (∀ a ∈ l, a ∈ s) ∧ l.Nodup := by
   constructor
@@ -163,121 +167,122 @@ theorem permutation_int (s : Finset ℕ) (k : ℕ) (l : List ℕ) :
       case right => exact h.right.left
     exact h.right.right
 
-def head' (l : List ℕ) :=
-  match l with
-  | [] => 0
-  | a :: _ => a
+-- def head' (l : List ℕ) :=
+--   match l with
+--   | [] => 0
+--   | a :: _ => a
 
-def tail' (l : List ℕ) :=
-  match l with
-  | [] => []
-  | _ :: as => as
+-- def tail' (l : List ℕ) :=
+--   match l with
+--   | [] => []
+--   | _ :: as => as
 
-def filter_and_omit_by_head (ss : Finset (List ℕ)) (a : ℕ) :=
-  (ss.filter (fun l ↦ (head' l) = a)).image (fun l ↦ tail' l)
+-- def filter_and_omit_by_head (ss : Finset (List ℕ)) (a : ℕ) :=
+--   (ss.filter (fun l ↦ (head' l) = a)).image (fun l ↦ tail' l)
 
-variable (ss : Finset (List ℕ)) (h_nonempty : ∀ x ∈ ss, x ≠ []) (target : ℕ)
+-- variable (ss : Finset (List ℕ)) (h_nonempty : ∀ x ∈ ss, x ≠ []) (target : ℕ)
 
-#eval filter_and_omit_by_head {[0, 1, 2], [0, 2, 1], [1, 2, 3], [0, 3, 1]} 0
+-- #eval filter_and_omit_by_head {[0, 1, 2], [0, 2, 1], [1, 2, 3], [0, 3, 1]} 0
 
-#check Finset.attach
+-- #check Finset.attach
 
-variable (ss : Finset (List ℕ)) (h_nonempty : ∀ x ∈ ss, x ≠ []) (target : ℕ)
+-- variable (ss : Finset (List ℕ)) (h_nonempty : ∀ x ∈ ss, x ≠ []) (target : ℕ)
 
-lemma permutation_rec_sub (s : Finset ℕ) (k : ℕ) (a : ℕ) (h : a ∈ s) :
-    filter_and_omit_by_head (permutation s (k + 1)) a = permutation (s.erase a) k
-    := by
-  apply Finset.ext_iff.mpr
-  intro l
-  constructor
-  case mp =>
-    intro hl
-    unfold filter_and_omit_by_head at hl
-    simp only [Finset.mem_image, Finset.mem_filter] at hl
-    obtain ⟨l1, hl1⟩ := hl
-    have hl1_length : l1.length = k + 1 := by
-      apply ((permutation_int s (k + 1) l1).mp hl1.left.left).left
-    cases l1
-    case nil => contradiction
-    case cons b bs =>
-      apply (permutation_int (s.erase a) k l).mpr
-      simp only [List.length_cons, Nat.add_right_cancel_iff] at hl1_length
-      unfold head' tail' at hl1
-      simp only at hl1
-      rw [hl1.right] at hl1_length
-      constructor
-      case left => apply hl1_length
-      case right =>
-        constructor
-        case left =>
-          intro c hc
-          rw [hl1.right] at hl1
-          have h2 : ∀ d ∈ b :: l, d ∈ s := by
-            apply ((permutation_int s (k + 1) (b :: l)).mp hl1.left.left).right.left
-          simp only [Finset.mem_erase, ne_eq]
-          have h3 : (b :: l).Nodup := by
-            apply ((permutation_int s (k + 1) (b :: l)).mp hl1.left.left).right.right
-          rw [hl1.left.right] at h3
-          simp only [List.nodup_cons] at h3
-          constructor
-          case left =>
-            by_contra
-            absurd h3.left
-            rw [this] at hc
-            exact hc
-          apply h2
-          right
-          exact hc
-        case right =>
-          have h4 : (b :: bs).Nodup := by
-            apply ((permutation_int s (k + 1) (b :: bs)).mp hl1.left.left).right.right
-          rw [hl1.right] at h4
-          simp only [List.nodup_cons] at h4
-          exact h4.right
-  case mpr =>
-    intro hl
-    unfold filter_and_omit_by_head
-    simp only [Finset.mem_image, Finset.mem_filter]
-    have h1 : l.length = k ∧ (∀ b ∈ l, b ∈ (s.erase a)) ∧ l.Nodup := by
-      apply (permutation_int (s.erase a) k l).mp hl
-    use (a :: l)
-    constructor
-    case left =>
-      constructor
-      case left =>
-        apply (permutation_int s (k + 1) (a :: l)).mpr
-        constructor
-        case left =>
-          simp only [List.length_cons, Nat.add_right_cancel_iff]
-          exact h1.left
-        constructor
-        case left =>
-          intro c hc
-          simp only [List.mem_cons] at hc
-          cases hc
-          case inl hc_l =>
-            rw [hc_l]
-            exact h
-          case inr hc_r =>
-            have h2 : c ∈ s.erase a := by
-              apply h1.right.left
-              exact hc_r
-            simp only [Finset.mem_erase, ne_eq] at h2
-            exact h2.right
-        simp only [List.nodup_cons]
-        constructor
-        case left =>
-          by_contra
-          have h2 : a ∈ s.erase a := by
-            apply h1.right.left a this
-          simp only [Finset.mem_erase, ne_eq, not_true_eq_false, false_and] at h2
-        exact h1.right.right
-      case right =>
-        unfold head'
-        simp only
-    case h.right =>
-      unfold tail'
-      simp only
+-- I meant to use it to prove permutation_rec, but I did not.
+-- lemma permutation_rec_sub (s : Finset ℕ) (k : ℕ) (a : ℕ) (h : a ∈ s) :
+--     filter_and_omit_by_head (permutation s (k + 1)) a = permutation (s.erase a) k
+--     := by
+--   apply Finset.ext_iff.mpr
+--   intro l
+--   constructor
+--   case mp =>
+--     intro hl
+--     unfold filter_and_omit_by_head at hl
+--     simp only [Finset.mem_image, Finset.mem_filter] at hl
+--     obtain ⟨l1, hl1⟩ := hl
+--     have hl1_length : l1.length = k + 1 := by
+--       apply ((permutation_int s (k + 1) l1).mp hl1.left.left).left
+--     cases l1
+--     case nil => contradiction
+--     case cons b bs =>
+--       apply (permutation_int (s.erase a) k l).mpr
+--       simp only [List.length_cons, Nat.add_right_cancel_iff] at hl1_length
+--       unfold head' tail' at hl1
+--       simp only at hl1
+--       rw [hl1.right] at hl1_length
+--       constructor
+--       case left => apply hl1_length
+--       case right =>
+--         constructor
+--         case left =>
+--           intro c hc
+--           rw [hl1.right] at hl1
+--           have h2 : ∀ d ∈ b :: l, d ∈ s := by
+--             apply ((permutation_int s (k + 1) (b :: l)).mp hl1.left.left).right.left
+--           simp only [Finset.mem_erase, ne_eq]
+--           have h3 : (b :: l).Nodup := by
+--             apply ((permutation_int s (k + 1) (b :: l)).mp hl1.left.left).right.right
+--           rw [hl1.left.right] at h3
+--           simp only [List.nodup_cons] at h3
+--           constructor
+--           case left =>
+--             by_contra
+--             absurd h3.left
+--             rw [this] at hc
+--             exact hc
+--           apply h2
+--           right
+--           exact hc
+--         case right =>
+--           have h4 : (b :: bs).Nodup := by
+--             apply ((permutation_int s (k + 1) (b :: bs)).mp hl1.left.left).right.right
+--           rw [hl1.right] at h4
+--           simp only [List.nodup_cons] at h4
+--           exact h4.right
+--   case mpr =>
+--     intro hl
+--     unfold filter_and_omit_by_head
+--     simp only [Finset.mem_image, Finset.mem_filter]
+--     have h1 : l.length = k ∧ (∀ b ∈ l, b ∈ (s.erase a)) ∧ l.Nodup := by
+--       apply (permutation_int (s.erase a) k l).mp hl
+--     use (a :: l)
+--     constructor
+--     case left =>
+--       constructor
+--       case left =>
+--         apply (permutation_int s (k + 1) (a :: l)).mpr
+--         constructor
+--         case left =>
+--           simp only [List.length_cons, Nat.add_right_cancel_iff]
+--           exact h1.left
+--         constructor
+--         case left =>
+--           intro c hc
+--           simp only [List.mem_cons] at hc
+--           cases hc
+--           case inl hc_l =>
+--             rw [hc_l]
+--             exact h
+--           case inr hc_r =>
+--             have h2 : c ∈ s.erase a := by
+--               apply h1.right.left
+--               exact hc_r
+--             simp only [Finset.mem_erase, ne_eq] at h2
+--             exact h2.right
+--         simp only [List.nodup_cons]
+--         constructor
+--         case left =>
+--           by_contra
+--           have h2 : a ∈ s.erase a := by
+--             apply h1.right.left a this
+--           simp only [Finset.mem_erase, ne_eq, not_true_eq_false, false_and] at h2
+--         exact h1.right.right
+--       case right =>
+--         unfold head'
+--         simp only
+--     case h.right =>
+--       unfold tail'
+--       simp only
 
 def f (s : Finset ℕ) (k : ℕ) := Finset.biUnion s
   (fun a ↦ Finset.image (fun as ↦ a :: as ) (permutation (s.erase a) k))
@@ -290,64 +295,63 @@ lemma permutation_rec (s : Finset ℕ) (k : ℕ) :
     (fun a ↦ Finset.image (fun as ↦ a :: as ) (permutation (s.erase a) k))
     := by
   ext l
-  case h =>
-    constructor
-    case mp =>
-      intro h
-      simp only [Finset.mem_biUnion, Finset.mem_image]
-      apply (permutation_int s (k + 1 ) l).mp at h
-      cases l
-      case nil =>
-        unfold List.length at h
-        omega
-      case cons b bs =>
-        simp only [List.length_cons, Nat.add_right_cancel_iff, List.mem_cons, forall_eq_or_imp,
-          List.nodup_cons] at h
-        use b
-        and_intros
-        case h.refine_1 =>
-          apply h.right.left.left
-        case h.refine_2 =>
-          use bs
-          constructor
-          case h.left =>
-            apply (permutation_int (s.erase b) k bs).mpr
-            and_intros
-            case refine_1 =>
-              exact h.left
-            case refine_2.refine_1 =>
-              intro a ha
-              simp only [Finset.mem_erase, ne_eq]
-              constructor
-              case left =>
-                by_contra
-                absurd h.right.right.left
-                rw [← this]
-                exact ha
-              obtain ⟨h1, h2, h3⟩ := h
-              apply h2.right a ha
-            apply h.right.right.right
-          rfl
-    case mpr =>
-      intro h
-      simp only [Finset.mem_biUnion, Finset.mem_image] at h
-      obtain ⟨a, ha, ⟨as, ⟨has1, has2⟩⟩⟩ := h
-      apply (permutation_int s (k + 1) l).mpr
-      apply (permutation_int (s.erase a) k as).mp at has1
-      obtain ⟨has1_length, has1_sub, has1_nodup⟩ := has1
-      rw [← has2]
+  constructor
+  case mp =>
+    intro h
+    simp only [Finset.mem_biUnion, Finset.mem_image]
+    apply (permutation_int s (k + 1 ) l).mp at h
+    cases l
+    case nil =>
+      unfold List.length at h
+      omega
+    case cons b bs =>
       simp only [List.length_cons, Nat.add_right_cancel_iff, List.mem_cons, forall_eq_or_imp,
-        List.nodup_cons]
+        List.nodup_cons] at h
+      use b
       and_intros
-      · exact has1_length
-      · exact ha
-      · intro b hb
-        exact Finset.mem_of_mem_erase (has1_sub b hb)
-      · by_contra
-        have h1 : a ∈ s.erase a := by
-          apply has1_sub a this
-        simp only [Finset.mem_erase, ne_eq, not_true_eq_false, false_and] at h1
-      · exact has1_nodup
+      case h.refine_1 =>
+        apply h.right.left.left
+      case h.refine_2 =>
+        use bs
+        constructor
+        case h.left =>
+          apply (permutation_int (s.erase b) k bs).mpr
+          and_intros
+          case refine_1 =>
+            exact h.left
+          case refine_2.refine_1 =>
+            intro a ha
+            simp only [Finset.mem_erase, ne_eq]
+            constructor
+            case left =>
+              by_contra
+              absurd h.right.right.left
+              rw [← this]
+              exact ha
+            obtain ⟨h1, h2, h3⟩ := h
+            apply h2.right a ha
+          apply h.right.right.right
+        rfl
+  case mpr =>
+    intro h
+    simp only [Finset.mem_biUnion, Finset.mem_image] at h
+    obtain ⟨a, ha, ⟨as, ⟨has1, has2⟩⟩⟩ := h
+    apply (permutation_int s (k + 1) l).mpr
+    apply (permutation_int (s.erase a) k as).mp at has1
+    obtain ⟨has1_length, has1_sub, has1_nodup⟩ := has1
+    rw [← has2]
+    simp only [List.length_cons, Nat.add_right_cancel_iff, List.mem_cons, forall_eq_or_imp,
+      List.nodup_cons]
+    and_intros
+    · exact has1_length
+    · exact ha
+    · intro b hb
+      exact Finset.mem_of_mem_erase (has1_sub b hb)
+    · by_contra
+      have h1 : a ∈ s.erase a := by
+        apply has1_sub a this
+      simp only [Finset.mem_erase, ne_eq, not_true_eq_false, false_and] at h1
+    · exact has1_nodup
 
 example (s : Finset ℕ) (f : ℕ → ℕ) (m : ℕ) (h : ∀ a ∈ s, f a = m) :
     Finset.sum s f = s.card * m := by
