@@ -139,7 +139,7 @@ lemma comb_w_rep_rec (n k : ℕ) : comb_w_rep (n + 1) (k + 1) =
       case pos =>
         right
         constructor
-        case h.left =>
+        case left =>
           unfold comb_w_rep
           simp only [Finset.mem_filter]
           constructor
@@ -152,12 +152,12 @@ lemma comb_w_rep_rec (n k : ℕ) : comb_w_rep (n + 1) (k + 1) =
               apply hl_range
               right; exact hb
           case right => omega
-        case h.right => omega
+        case right => omega
       case neg =>
         left
         cases a
-        case h.zero => contradiction
-        case h.succ ap =>
+        case zero => contradiction
+        case succ ap =>
           use ap :: as
           constructor
           case h.left =>
