@@ -199,3 +199,52 @@ lemma comb_w_rep_rec (n k : ℕ) : comb_w_rep (n + 1) (k + 1) =
       rw [← has_r]
       simp only [List.length_cons, Nat.add_right_cancel_iff, List.sum_cons, zero_add]
       exact ⟨has_length, has_sum⟩
+
+-- lemma comb_w_rep_rec (n k : ℕ) : comb_w_rep (n + 1) (k + 1) =
+--     (comb_w_rep (n + 1) k).image (List.modifyHead (· + 1)) ∪
+--     (comb_w_rep n (k + 1)).image (List.cons 0) := by
+
+theorem listN_sum_zero_all_zero (l : List ℕ) (h_sum : l.sum = 0) :
+    l = List.replicate l.length 0 := by
+  generalize h_length : l.length = n
+  revert l
+  induction n
+  case zero =>
+    simp only [List.length_eq_zero_iff, List.replicate_zero, imp_self, implies_true]
+  case succ n ih =>
+    intro l hl_sum hl_length
+    cases l
+    case nil =>
+      simp only [List.length_nil, Nat.right_eq_add, Nat.add_eq_zero_iff, one_ne_zero,
+        and_false] at hl_length
+    case cons a as =>
+      simp only [List.length_cons, Nat.add_right_cancel_iff] at hl_length
+      unfold List.replicate
+      simp only [List.cons.injEq]
+      simp only [List.sum_cons, Nat.add_eq_zero_iff] at hl_sum
+      constructor
+      case left =>
+        exact hl_sum.left
+      case right =>
+        apply ih as hl_sum.right hl_length
+
+theorem comb_w_rep_count (n k : ℕ) (hn : n ≥ 1) :
+    (comb_w_rep n k).card = Nat.choose (n + k - 1) k := by
+  cases n
+  case zero => contradiction
+  case succ n =>
+    simp only [Nat.succ_add_sub_one]
+    induction h : n + k using Nat.strong_induction_on generalizing n k
+    case h d ih =>
+      cases k
+      case zero =>
+        simp only [Nat.choose_zero_right]
+        have h1 : comb_w_rep (n + 1) 0 = {List.replicate (n + 1) 0} := by
+          apply Finset.ext_iff.mpr
+          intro l
+          simp only [Finset.mem_singleton]
+          constructor
+          case mp =>
+            intro hl
+            rw [comb_w_rep_int] at hl
+            obtain ⟨hl_length, hl_sum⟩ := hl
