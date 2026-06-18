@@ -248,4 +248,15 @@ theorem comb_w_rep_count (n k : ℕ) (hn : n ≥ 1) :
             intro hl
             rw [comb_w_rep_int] at hl
             obtain ⟨hl_length, hl_sum⟩ := hl
-            apply listN
+            rw [← hl_length]
+            apply listN_sum_zero_all_zero l hl_sum
+          case mpr =>
+            intro hl
+            rw [comb_w_rep]
+            simp only [zero_add, Finset.range_one, Finset.mem_filter]
+            constructor
+            case left =>
+              rw [allListsOfLength_int]
+              constructor
+              case left =>
+                apply?
