@@ -228,6 +228,26 @@ theorem listN_sum_zero_all_zero (l : List ℕ) (h_sum : l.sum = 0) :
       case right =>
         apply ih as hl_sum.right hl_length
 
+example (l : List ℕ) (h : l.all (fun b => b = 0)) (a : ℕ) (ha : a ∈ l) :
+    a = 0 := by
+  rw [List.all_iff_forall_prop] at h
+  apply h a ha
+
+theorem comb_w_rep_zero (k : ℕ) : comb_w_rep 0 (k + 1) = ∅ := by
+  ext a
+  constructor
+  case mp =>
+    intro ha
+    rw [comb_w_rep_int] at ha
+    obtain ⟨ha_length, ha_sum⟩ := ha
+    have h1 : a = [] := by
+      exact List.eq_nil_iff_length_eq_zero.mpr ha_length
+    rw [h1] at ha_sum
+    contradiction
+  case mpr =>
+    intro h
+    contradiction
+
 theorem comb_w_rep_count (n k : ℕ) (hn : n ≥ 1) :
     (comb_w_rep n k).card = Nat.choose (n + k - 1) k := by
   cases n
@@ -254,9 +274,85 @@ theorem comb_w_rep_count (n k : ℕ) (hn : n ≥ 1) :
             intro hl
             rw [comb_w_rep]
             simp only [zero_add, Finset.range_one, Finset.mem_filter]
+            rw [hl]
             constructor
             case left =>
               rw [allListsOfLength_int]
               constructor
               case left =>
-                apply?
+                apply List.length_replicate
+              case right =>
+                have h1 : l.all (fun b => b = 0) := by
+                  rw [hl]
+                  apply List.all_replicate
+                intro a ha
+                simp only [Finset.mem_singleton]
+                rw [List.all_iff_forall_prop] at h1
+                rw [← hl] at ha
+                apply h1 a ha
+            case right =>
+              simp only [List.sum_replicate, nsmul_zero]
+        rw [h1]
+        simp only [Finset.card_singleton]
+      case succ k =>
+        rw [comb_w_rep_rec]
+        rw [Finset.card_union]
+        have h1 : (Finset.image (List.modifyHead fun x ↦ x + 1)
+            (comb_w_rep (n + 1) k)).card = (n + k).choose k := by
+          calc
+          _ = (comb_w_rep (n + 1) k).card := by
+            apply Finset.card_image_iff.mpr
+            intro t ht u hu h
+            simp only [SetLike.mem_coe] at ht
+            simp only [SetLike.mem_coe] at hu
+            rw [comb_w_rep_int] at ht
+            rw [comb_w_rep_int] at hu
+            cases t
+            case nil =>
+              absurd ht.left
+              simp only [List.length_nil, Nat.right_eq_add, Nat.add_eq_zero_iff, one_ne_zero,
+                and_false, not_false_eq_true]
+            case cons a as =>
+              cases u
+              case nil =>
+                absurd hu.left
+                simp only [List.length_nil, Nat.right_eq_add, Nat.add_eq_zero_iff, one_ne_zero,
+                  and_false, not_false_eq_true]
+              case cons b bs =>
+                simp only [List.modifyHead_cons, List.cons.injEq, Nat.add_right_cancel_iff] at h
+                simp only [List.cons.injEq]
+                exact h
+          _ = (n + k).choose k := by
+            apply ih (n + k)
+            case a => omega
+            case hn => omega
+            case h => rfl
+        rw [h1]
+        have h2 : (Finset.image (List.cons 0) (comb_w_rep n (k + 1))).card =
+            (n + k).choose (k + 1) := by
+          cases n
+          case zero =>
+            simp only [zero_add, Nat.choose_succ_self, Finset.card_eq_zero, Finset.image_eq_empty]
+            apply comb_w_rep_zero k
+          case succ n =>
+            calc
+            (Finset.image (List.cons 0) (comb_w_rep (n + 1) (k + 1))).card
+                = (comb_w_rep (n + 1) (k + 1)).card := by
+              apply Finset.card_image_iff.mpr
+              simp only [List.cons.injEq, true_and, implies_true, Set.injOn_of_eq_iff_eq]
+            _ = (n + 1 + k).choose (k + 1) := by
+              apply ih (n + 1 + k) (by omega) (k + 1) n
+              case hn => omega
+              case h => omega
+        rw [h2]
+        have h3 : (Finset.image (List.modifyHead fun x ↦ x + 1)
+            (comb_w_rep (n + 1) k) ∩
+            Finset.image (List.cons 0) (comb_w_rep n (k + 1))).card = 0 := by
+          apply Finset.card_eq_zero.mpr
+          ext l
+          constructor
+          case mp =>
+            intro hl
+            simp only [Finset.mem_inter, Finset.mem_image] at hl
+            obtain ⟨⟨l1, ⟨hl1_l, hl1_r⟩⟩, ⟨hl2, ⟨hl2_l, hl2_r⟩⟩⟩ := hl
+            cases l1
