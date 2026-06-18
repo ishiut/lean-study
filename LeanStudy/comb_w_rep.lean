@@ -248,3 +248,4 @@ theorem comb_w_rep_count (n k : ℕ) (hn : n ≥ 1) :
             intro hl
             rw [comb_w_rep_int] at hl
             obtain ⟨hl_length, hl_sum⟩ := hl
+            apply listN
