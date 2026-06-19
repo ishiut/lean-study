@@ -248,7 +248,7 @@ theorem comb_w_rep_zero (k : ℕ) : comb_w_rep 0 (k + 1) = ∅ := by
     intro h
     contradiction
 
-theorem comb_w_rep_count (n k : ℕ) (hn : n ≥ 1) :
+theorem comb_w_rep_card (n k : ℕ) (hn : n ≥ 1) :
     (comb_w_rep n k).card = Nat.choose (n + k - 1) k := by
   cases n
   case zero => contradiction
@@ -372,4 +372,5 @@ theorem comb_w_rep_count (n k : ℕ) (hn : n ≥ 1) :
             contradiction
         rw [h3]
         simp only [tsub_zero]
-        apply?
+        rw [← h]
+        exact Eq.symm (Nat.choose_succ_succ' (n.add k) k)
