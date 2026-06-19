@@ -403,7 +403,7 @@ lemma combination_card (n : ℕ) (k : ℕ) (hk : k ≤ n) (s : Finset ℕ)
       case neg =>
         have h1 : k = n := by omega
         rw [h1]
-        unfold combination
+        dsimp [combination]
         simp only [Nat.choose_self]
         have h1 : {t ∈ s.powerset | t.card = n + 1} = {s} := by
           apply Finset.ext_iff.mpr
