@@ -2,20 +2,16 @@ import Mathlib
 
 #eval Finset.powerset {0, 1, 2, 3}
 
-theorem powerset_card_sub (n : ℕ) (s : Finset ℕ) (h : s.card = n) :
-    s.powerset.card = 2 ^ n := by
-  revert s
-  induction n
+theorem powerset_card (s : Finset ℕ) : s.powerset.card = 2 ^ (s.card) := by
+  induction hn : s.card generalizing s
   case zero =>
-    intro s hs
-    simp only [Finset.card_eq_zero] at hs
-    rw [hs]
-    simp only [Finset.powerset_empty, Finset.card_singleton, pow_zero]
-  case succ k ih =>
-    intro s hs
+    simp only [Finset.card_powerset, pow_zero, pow_eq_one_iff, OfNat.ofNat_ne_one,
+      Finset.card_eq_zero, false_or]
+    exact Finset.card_eq_zero.mp hn
+  case succ k ih=>
     have h1 : s.card ≠ 0 := by
       by_contra
-      rw [this] at hs
+      rw [this] at hn
       omega
     have hs_nonempty : s.Nonempty := by
       exact Finset.card_ne_zero.mp h1
@@ -126,9 +122,9 @@ theorem powerset_card_sub (n : ℕ) (s : Finset ℕ) (h : s.card = n) :
         intro hb
         have hb2 : b ∈ (t : Set ℕ) := by exact Finset.mem_coe.mpr hb
         have hb3 : b ∈ (s : Set ℕ) \ {a} := by
-          exact Set.mem_diff_singleton.mpr (ht hb)
+          exact Set.mem_sdiff_singleton.mpr (ht hb)
         have hb_neq_a : b ≠ a := by
-          simp only [Set.mem_diff, SetLike.mem_coe, Set.mem_singleton_iff] at hb3
+          simp only [Set.mem_sdiff, SetLike.mem_coe, Set.mem_singleton_iff] at hb3
           exact hb3.right
         have hb4 : b ∈ insert a t := by
           simp only [Finset.mem_insert]
@@ -175,10 +171,6 @@ theorem powerset_card_sub (n : ℕ) (s : Finset ℕ) (h : s.card = n) :
     absurd hau
     simp only [Finset.mem_insert, true_or]
 
-theorem powerset_card (s : Finset ℕ) : s.powerset.card = 2 ^ (s.card) := by
-  apply powerset_card_sub
-  rfl
-
 -- The following definitions are the same.
 -- def combination (s : Finset ℕ) (k : ℕ) : Finset (Finset ℕ) :=
 --   s.powerset.filter (fun t ↦ t.card = k)
@@ -198,7 +190,7 @@ lemma combination_rec (s : Finset ℕ) (k : ℕ) (a : ℕ) (ha : a ∈ s) :
   apply Finset.ext
   intro t
   constructor
-  case h.mp =>
+  case mp =>
     intro ht
     simp only [Finset.union_singleton, Finset.mem_union, Finset.mem_image]
     unfold combination
@@ -232,7 +224,7 @@ lemma combination_rec (s : Finset ℕ) (k : ℕ) (a : ℕ) (ha : a ∈ s) :
           contradiction
         · apply ht.left hb
       · exact ht.right
-  case h.mpr =>
+  case mpr =>
     intro ht
     simp only [Finset.union_singleton, Finset.mem_union, Finset.mem_image] at ht
     obtain ht_l | ht_r := ht
