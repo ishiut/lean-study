@@ -354,5 +354,22 @@ theorem comb_w_rep_count (n k : ℕ) (hn : n ≥ 1) :
           case mp =>
             intro hl
             simp only [Finset.mem_inter, Finset.mem_image] at hl
-            obtain ⟨⟨l1, ⟨hl1_l, hl1_r⟩⟩, ⟨hl2, ⟨hl2_l, hl2_r⟩⟩⟩ := hl
+            obtain ⟨⟨l1, ⟨hl1_l, hl1_r⟩⟩, ⟨l2, ⟨hl2_l, hl2_r⟩⟩⟩ := hl
+            rw [comb_w_rep_int] at hl1_l
+            rw [comb_w_rep_int] at hl2_l
             cases l1
+            case nil =>
+              absurd hl1_l.left
+              simp only [List.length_nil, Nat.right_eq_add, Nat.add_eq_zero_iff, one_ne_zero,
+                and_false, not_false_eq_true]
+            case cons a as =>
+              simp only [List.modifyHead_cons] at hl1_r
+              rw [← hl2_r] at hl1_r
+              simp only [List.cons.injEq, Nat.add_eq_zero_iff, one_ne_zero, and_false,
+                false_and] at hl1_r
+          case mpr =>
+            intro h3
+            contradiction
+        rw [h3]
+        simp only [tsub_zero]
+        apply?
