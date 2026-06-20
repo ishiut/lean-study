@@ -1,5 +1,9 @@
 # History
 
+## 2026-06-19
+- The proof of comb_w_rec_card was completed. 
+- It was renamed from comb_w_rep_count. 
+
 ## 2026-06-17
 - The proof of comb_w_rep_zero (k : ℕ) was completed. 
 - Some progress, but the proof of comb_w_rep_count was not done yet. 
