@@ -199,19 +199,13 @@ lemma comb_w_rep_rec (n k : ℕ) : comb_w_rep (n + 1) (k + 1) =
       simp only [List.length_cons, Nat.add_right_cancel_iff, List.sum_cons, zero_add]
       exact ⟨has_length, has_sum⟩
 
--- lemma comb_w_rep_rec (n k : ℕ) : comb_w_rep (n + 1) (k + 1) =
---     (comb_w_rep (n + 1) k).image (List.modifyHead (· + 1)) ∪
---     (comb_w_rep n (k + 1)).image (List.cons 0) := by
-
-theorem listN_sum_zero_all_zero (l : List ℕ) (h_sum : l.sum = 0) :
+theorem listN_sum_zero_all_zero (l : List ℕ) (hl_sum : l.sum = 0) :
     l = List.replicate l.length 0 := by
-  generalize h_length : l.length = n
-  revert l
-  induction n
+  induction hl_length : l.length generalizing l
   case zero =>
-    simp only [List.length_eq_zero_iff, List.replicate_zero, imp_self, implies_true]
+    simp only [List.replicate_zero]
+    exact List.eq_nil_iff_length_eq_zero.mpr hl_length
   case succ n ih =>
-    intro l hl_sum hl_length
     cases l
     case nil =>
       simp only [List.length_nil, Nat.right_eq_add, Nat.add_eq_zero_iff, one_ne_zero,
