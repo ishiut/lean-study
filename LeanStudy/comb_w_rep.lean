@@ -201,6 +201,11 @@ lemma comb_w_rep_rec (n k : ℕ) : comb_w_rep (n + 1) (k + 1) =
 
 theorem listN_sum_zero_all_zero (l : List ℕ) (hl_sum : l.sum = 0) :
     l = List.replicate l.length 0 := by
+  have h1 : ∀ a ∈ l, a ≤ 0 := by
+    rw [← hl_sum]
+    apply List.le_sum_of_mem
+  
+
   induction hl_length : l.length generalizing l
   case zero =>
     simp only [List.replicate_zero]
