@@ -118,8 +118,7 @@ lemma comb_w_rep_int (n k : ℕ) (l : List ℕ) : l ∈ comb_w_rep n k ↔
 lemma comb_w_rep_rec (n k : ℕ) : comb_w_rep (n + 1) (k + 1) =
     (comb_w_rep (n + 1) k).image (List.modifyHead (· + 1)) ∪
     (comb_w_rep n (k + 1)).image (List.cons 0) := by
-  apply Finset.ext_iff.mpr
-  intro l
+  ext l
   constructor
   case mp =>
     intro hl
