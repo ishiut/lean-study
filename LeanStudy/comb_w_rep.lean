@@ -201,33 +201,12 @@ lemma comb_w_rep_rec (n k : ℕ) : comb_w_rep (n + 1) (k + 1) =
 
 theorem listN_sum_zero_all_zero (l : List ℕ) (hl_sum : l.sum = 0) :
     l = List.replicate l.length 0 := by
-  -- have h1 : ∀ a ∈ l, a ≤ 0 := by
-  --   rw [← hl_sum]
-  --   apply List.le_sum_of_mem
-  induction hl_length : l.length generalizing l
-  case zero =>
-    simp only [List.replicate_zero]
-    exact List.eq_nil_iff_length_eq_zero.mpr hl_length
-  case succ n ih =>
-    cases l
-    case nil =>
-      simp only [List.length_nil, Nat.right_eq_add, Nat.add_eq_zero_iff, one_ne_zero,
-        and_false] at hl_length
-    case cons a as =>
-      simp only [List.length_cons, Nat.add_right_cancel_iff] at hl_length
-      unfold List.replicate
-      simp only [List.cons.injEq]
-      simp only [List.sum_cons, Nat.add_eq_zero_iff] at hl_sum
-      constructor
-      case left =>
-        exact hl_sum.left
-      case right =>
-        apply ih as hl_sum.right hl_length
-
-example (l : List ℕ) (h : l.all (fun b => b = 0)) (a : ℕ) (ha : a ∈ l) :
-    a = 0 := by
-  rw [List.all_iff_forall_prop] at h
-  apply h a ha
+  have h1 : ∀ a ∈ l, a = 0 := by
+    intro a ha
+    apply Nat.eq_zero_of_le_zero
+    rw [← hl_sum]
+    exact List.le_sum_of_mem ha
+  exact List.eq_replicate_of_mem h1
 
 theorem comb_w_rep_zero (k : ℕ) : comb_w_rep 0 (k + 1) = ∅ := by
   ext a
