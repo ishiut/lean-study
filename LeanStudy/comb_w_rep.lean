@@ -201,12 +201,11 @@ lemma comb_w_rep_rec (n k : ℕ) : comb_w_rep (n + 1) (k + 1) =
 
 theorem listN_sum_zero_all_zero (l : List ℕ) (hl_sum : l.sum = 0) :
     l = List.replicate l.length 0 := by
-  have h1 : ∀ a ∈ l, a = 0 := by
-    intro a ha
-    apply Nat.eq_zero_of_le_zero
-    rw [← hl_sum]
-    exact List.le_sum_of_mem ha
-  exact List.eq_replicate_of_mem h1
+  apply List.eq_replicate_of_mem
+  intro a ha
+  apply Nat.eq_zero_of_le_zero
+  rw [← hl_sum]
+  exact List.le_sum_of_mem ha
 
 theorem comb_w_rep_zero (k : ℕ) : comb_w_rep 0 (k + 1) = ∅ := by
   ext a
