@@ -1,5 +1,9 @@
 # History
 
+## 2026-10-03
+- types.lean was added. 
+- It is to understand the type systems. 
+
 ## 2026-06-19
 - The proof of comb_w_rec_card was completed. 
 - It was renamed from comb_w_rep_count. 
