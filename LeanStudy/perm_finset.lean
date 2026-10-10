@@ -1,72 +1,110 @@
 import Mathlib
 
+-- image f s is the forward image of s under f.
+-- f: α → β, This α and β may belong to different universes.
+-- The assumption says α : Type u_1 and β : TYpe u_2
 #check Finset.image
 #eval Finset.image (fun (a : ℕ) ↦ a :: [2, 3]) {0, 1}
+
+
+-- range n is the set of natural numbers less than n
+#check Finset.range 5
+#eval Finset.range 5
+
+-- image s f is the forward image of s under f.
+-- ⋃_{a∈s}f(a)
+#check Finset.biUnion
+def make_doubleton (n : ℕ) : Finset ℕ := {n, n+1}
+#check make_doubleton
+#check make_doubleton 1
+#eval make_doubleton 2
+#eval Finset.biUnion {0, 5, 10, 15} make_doubleton
+
+-- def allListsOfLength (s : Finset ℕ) (k : ℕ) : Finset (List ℕ) :=
+--   match k with
+--   | 0 => {[]}
+--   | k + 1 =>
+--       Finset.biUnion (allListsOfLength s k)
+--         (fun t => Finset.image (fun a => a :: t) s)
 
 def allListsOfLength (s : Finset ℕ) (k : ℕ) : Finset (List ℕ) :=
   match k with
   | 0 => {[]}
   | k + 1 =>
-      Finset.biUnion (allListsOfLength s k)
-        (fun t ↦ Finset.image (fun a ↦ a :: t) s)
+      Finset.biUnion s
+        (fun a => Finset.image (List.cons a) (allListsOfLength s k))
+
+#eval allListsOfLength {0, 1, 2} 1
+#eval allListsOfLength {0, 1, 2} 2
+#eval allListsOfLength {0, 1, 2} 3
 
 theorem allListsOfLength_int (s : Finset ℕ) (k : ℕ) (l : List ℕ) :
     l ∈ allListsOfLength s k ↔ l.length = k ∧ ∀ a ∈ l, a ∈ s := by
-  revert l
-  induction k
+  -- revert l
+  induction k generalizing l
   case zero =>
-    intro l
+    -- intro l
     unfold allListsOfLength
+    -- simp? will work.
     simp only [Finset.mem_singleton, List.length_eq_zero_iff, iff_self_and]
     intro hl a ha
     rw [hl] at ha
     contradiction
   case succ k ih =>
-    intro l
+    -- intro l
     unfold allListsOfLength
     constructor
     case mp =>
       intro hl
       simp only [Finset.mem_biUnion, Finset.mem_image] at hl
-      obtain ⟨as, has⟩ := hl
-      obtain ⟨a, ha⟩ := has.right
+      obtain ⟨a, ⟨has, ⟨l1, ⟨hl1, hal⟩⟩⟩⟩ := hl
+      -- obtain ⟨as, has⟩ := hl
+      -- obtain ⟨a, ha⟩ := has.right
       constructor
       case left =>
-        rw [← ha.right]
+        rw [← hal]
+        -- simp?
         simp only [List.length_cons, Nat.add_right_cancel_iff]
-        apply ((ih as).mp has.left).left
+        apply ((ih l1).mp hl1).left
       case right =>
         intro b hb
-        rw [← ha.right] at hb
+        rw [← hal] at hb
+        -- simp? at hb
         simp only [List.mem_cons] at hb
         cases hb
         case inl hb_l =>
           rw [hb_l]
-          exact ha.left
+          exact has
         case inr hb_r =>
-          apply ((ih as).mp has.left).right b hb_r
+          apply ((ih l1).mp hl1).right b hb_r
     case mpr =>
       intro hl
+      -- simp?
       simp only [Finset.mem_biUnion, Finset.mem_image]
+      obtain ⟨hl_length, hl_elts⟩ := hl
       cases l
       case nil =>
-        unfold List.length at hl
+        unfold List.length at hl_length
         omega
       case cons b bs =>
-        simp only [List.length_cons, Nat.add_right_cancel_iff, List.mem_cons,
-          forall_eq_or_imp] at hl
-        use bs
+        simp only [List.mem_cons, forall_eq_or_imp] at hl_elts
+        use b
         constructor
         case h.left =>
-          apply (ih bs).mpr
+          apply hl_elts.left
+        case h.right =>
+          use bs
           constructor
-          case left =>
-            apply hl.left
-          case right =>
-            apply hl.right.right
-        use b
-        simp only [and_true]
-        exact hl.right.left
+          case h.left =>
+            apply (ih bs).mpr
+            constructor
+            case left =>
+              simp only [List.length_cons, Nat.add_right_cancel_iff] at hl_length
+              exact hl_length
+            case right =>
+              exact hl_elts.right
+          case h.right =>
+            trivial
 
 theorem disj_biUnion_card {α : Type} (s : Finset α) (f : α → Finset ℕ)
     (h_disj : ∀ a1 a2 : α, a1 ≠ a2 → Disjoint (f a1) (f a2)) :
