@@ -1,5 +1,7 @@
 import Mathlib
 
+#eval Lean.versionString
+
 def allListsOfLength (s : Finset ℕ) (k : ℕ) : Finset (List ℕ) :=
   match k with
   | 0 => {[]}
